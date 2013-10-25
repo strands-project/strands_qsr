@@ -18,13 +18,24 @@ def random_estimator_client(request):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
+def usage():
+    return "\nrandom_estimator_client.py <number_of_objects>\n\n\t<number of objects>\tnumber of objects in the scene\n"
+
+        
 if __name__ == "__main__":
+
+    if len(sys.argv) != 2:
+        print usage()
+        sys.exit(0)
 
     req = GetGroupEstimateRequest()
 
     req.type = ['Monitor','Keyboard','Mouse', 'Cup', 'Bottle', 'MobilePhone']
 
-    req.object_id = ['obj1','obj2','obj3','obj4', 'obj5']
+    req.object_id = list()
+    for i in range(int(sys.argv[1])):
+        req.object_id.append('obj' + str(i))
+        
 
     req.pose = list()
     req.bbox = list()
