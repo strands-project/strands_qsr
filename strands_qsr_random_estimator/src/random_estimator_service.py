@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+import roslib; roslib.load_manifest('strands_qsr_random_estimator')
+
 from strands_qsr_msgs.srv import *
 from strands_qsr_msgs.msg import *
 import rospy
