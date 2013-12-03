@@ -4,5 +4,5 @@ string object_id
 # object types
 string[] type
 
-# type weights
-float32[] weight
+# confidence of type
+float32[] confidence
