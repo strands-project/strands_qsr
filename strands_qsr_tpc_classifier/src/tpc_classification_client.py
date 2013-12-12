@@ -32,24 +32,27 @@ if __name__ == "__main__":
         scenes = json.load(scn_file)
 
         scn = scenes[int(sys.argv[2])]
+
+        print scn['position']
          
         req = GetGroupClassificationRequest()
 
         req.type = ['Bottle',
-                    'Calculator',
+#                    'Calculator',
                     'Cup',
                     'PC',
-                    'Glass',
-                    'Headphone',
+#                    'Glass',
+#                    'Headphone',
                     'Keyboard',
-                    'Keys',
-                    'Lamp',
-                    'Laptop',
-                    'MobilePhone',
-                    'Mouse',
-                    'Pencil',
-                    'Stapler',
-                    'Telephone']
+#                    'Keys',
+#                    'Lamp',
+#                    'Laptop',
+#                    'MobilePhone',
+                    'Monitor',
+                    'Mouse'] #,
+#                    'Pencil',
+#                    'Stapler',
+#                    'Telephone']
 
         req.object_id = list()
         req.pose = list()
@@ -88,5 +91,37 @@ if __name__ == "__main__":
             req.group_classification.append(ObjectClassification())
              
 
-        print(req)
-        print(tpc_classification_client(req))
+        #print(req)
+        res = tpc_classification_client(req)
+
+
+        tp = 0
+        fn = 0
+
+        other = 0
+        for i in range(len(res.group_classification)):
+
+            cls = res.group_classification[i].type[0] 
+            gt  = scn['type'][scn['objects'][i]]
+
+            print cls, '-', gt
+            
+            if gt not in req.type:
+                other += 1
+
+
+            if cls == gt:
+                tp += 1
+            else:
+                fn += 1
+
+
+        print "True positives:", tp
+        print "False negative:", fn
+        print "Other:", other
+        print "Performance:", float(tp) / float((len(res.group_classification) - other))
+        
+
+
+                
+                
