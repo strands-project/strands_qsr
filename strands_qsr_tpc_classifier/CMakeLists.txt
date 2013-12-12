@@ -4,7 +4,7 @@ project(strands_qsr_tpc_classifier)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS rospy strands_qsr_msgs/)
+find_package(catkin REQUIRED COMPONENTS rospy strands_qsr_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -50,7 +50,7 @@ find_package(catkin REQUIRED COMPONENTS rospy strands_qsr_msgs/)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES strands_qsr_tpc_classifier
-#  CATKIN_DEPENDS rospy strands_qsr_msgs/
+#  CATKIN_DEPENDS rospy strands_qsr_msgs
 #  DEPENDS system_lib
 )
 
