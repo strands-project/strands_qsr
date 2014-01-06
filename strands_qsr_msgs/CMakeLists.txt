@@ -10,14 +10,14 @@ find_package(catkin REQUIRED COMPONENTS geometry_msgs std_msgs message_generatio
 ## Generate messages in the 'msg' folder
 add_message_files(
  FILES
- GroupEstimate.msg
+ ObjectClassification.msg
  BBox.msg
 )
 
 ## Generate services in the 'srv' folder
 add_service_files(
  FILES
- GetGroupEstimate.srv
+ GetGroupClassification.srv
 )
 
 ## Generate added messages and services with any dependencies listed here

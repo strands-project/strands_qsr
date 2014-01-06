@@ -1,0 +1,19 @@
+# Classify object types for a cluster of bounding boxes  
+
+# relevant object types
+string[] type 
+
+# unique object identifiers
+string[] object_id
+
+# poses
+geometry_msgs/Pose[] pose
+
+# local bounding boxes
+strands_qsr_msgs/BBox[] bbox
+
+# empty or partial group classification for object IDs 
+strands_qsr_msgs/ObjectClassification[] group_classification
+---
+# classification for all object IDs
+strands_qsr_msgs/ObjectClassification[] group_classification
