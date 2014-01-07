@@ -1,0 +1,12 @@
+# Generate QSR description from scene geometry   
+# unique object identifiers
+string[] object_id
+
+# poses
+geometry_msgs/Pose[] pose
+
+# local bounding boxes
+strands_qsr_msgs/BBox[] bbox
+---
+# fol description of scenes in json format
+string predicates 

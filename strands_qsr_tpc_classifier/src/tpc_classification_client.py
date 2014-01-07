@@ -9,7 +9,7 @@ from strands_qsr_msgs.srv import *
 from geometry_msgs.msg import *
 
 def tpc_classification_client(request):
-    service_name = 'tpc_group_classification'
+    service_name = 'group_classification'
     rospy.wait_for_service(service_name)
     try:
         get_group_classification = rospy.ServiceProxy(service_name, GetGroupClassification)
@@ -33,8 +33,6 @@ if __name__ == "__main__":
 
         scn = scenes[int(sys.argv[2])]
 
-        print scn['position']
-         
         req = GetGroupClassificationRequest()
 
         req.type = ['Bottle',
@@ -91,7 +89,7 @@ if __name__ == "__main__":
             req.group_classification.append(ObjectClassification())
              
 
-        #print(req)
+
         res = tpc_classification_client(req)
 
 
@@ -104,7 +102,7 @@ if __name__ == "__main__":
             cls = res.group_classification[i].type[0] 
             gt  = scn['type'][scn['objects'][i]]
 
-            print cls, '-', gt
+            print cls, '(', gt, ')'
             
             if gt not in req.type:
                 other += 1

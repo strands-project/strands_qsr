@@ -1,14 +1,13 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('strands_qsr_tpc_classifier')
+import roslib; roslib.load_manifest('strands_qsr_sa_classifier')
 
 import rospy
 
 from strands_qsr_msgs.srv import *
 from strands_qsr_msgs.msg import *
-from qsr_msgs.msg import *
-from qsr_msgs.srv import *
 
 import matplotlib
+import json
 
 #from matplotlib import cm
 #import matplotlib.patches as mpatches
@@ -57,13 +56,9 @@ class Node:
 
 class GroupClassification(Problem):
 
-    def __init__(self, initial, positions, types, gmm_cache):
+    def __init__(self, initial, positions, types):
         super(GroupClassification, self).__init__(initial,types)
         self.positions = positions
-        self.gmm_cache = gmm_cache
-        service_name = 'qsr_to_gmm'
-        rospy.wait_for_service(service_name)
-        self.qsr_to_gmm = rospy.ServiceProxy(service_name, QSRToGMM)
 
     def actions(self,state):
         return ["replace"]
@@ -88,59 +83,8 @@ class GroupClassification(Problem):
         for i in range(len(state)):
             for j in range(len(state)):
                 if i != j:
-                    rel_obj_pos = [o - l for o, l in zip(self.positions[i],self.positions[j])]
-                    val += self.gmm_value(state[i],state[j],rel_obj_pos)
+                    val += 1
         return val
-
-#    def value(self, state):
-#        val = 0 
-#        for cls in state:
-#            val += len(cls)
-#        return val
-
-    def gmm_value(self, obj, landmark, rel_obj_position):
-
-        # Please note: this is a simple workaround, because currently the QSR for a
-        # objects of the same type is not supported
-        if obj == landmark:
-            return 0.0
-        
-        if (obj,landmark) not in self.gmm_cache:
-            # get gmm from qsr_to_gmm service
-            try:
-                req = QSRToGMMRequest()
-                req.object = obj
-                req.landmark = landmark
-                response = self.qsr_to_gmm(req)
-                gmm = dict()
-                gmm['weight'] = response.weight
-                gmm['gaussian'] = response.gaussian
-                gmm['probability'] = response.probability
-                self.gmm_cache[(obj,landmark)] = gmm
-            except rospy.ServiceException, e:
-                gmm = dict()
-                gmm['weight'] = []
-                gmm['gaussian'] = []
-                gmm['probability'] = response.probability
-                self.gmm_cache[(obj,landmark)] = gmm
-                print "Service call failed: %s"%e
-                
-        return self.compute_func_val(rel_obj_position, self.gmm_cache[(obj,landmark)])
-
-    def compute_func_val(self, pos, gmm):
-        #
-        gmm_val = 0.0
-        for j in range(len(gmm['weight'])):
-            cov = gmm['gaussian'][j].covariance
-            gmm_val +=  gmm['weight'][j] * matplotlib.mlab.bivariate_normal(pos[0],
-                                                                            pos[1],
-                                                                            math.sqrt(cov[0]),
-                                                                            math.sqrt(cov[3]),
-                                                                            gmm['gaussian'][j].mean[0],
-                                                                            gmm['gaussian'][j].mean[1],
-                                                                            cov[1])
-        return gmm['probability'] * gmm_val
-
 
             
 def probability(p):
@@ -190,27 +134,43 @@ def simulated_annealing(problem, schedule=exp_schedule()):
         #print(current, problem.value(current.state))
         #print("Current best state", best_state, best_value)
 
-class TPCClassifier():
+class SAClassifier():
 
     def __init__(self):
-        rospy.init_node('tpc_classification_server')
-        rospy.loginfo("Started TPC classification service")
-
-        self.gmm_cache = dict()
+        rospy.init_node('sa_classification_server')
+        rospy.loginfo("Started SA classification service")
 
         self.service = rospy.Service('group_classification', GetGroupClassification, self.handle_group_classification)
+
+        service_name = 'get_qsr_description'
+        rospy.wait_for_service(service_name)
+        self.qsr_desc = rospy.ServiceProxy(service_name, GetQSRDescription)
+        
         rospy.loginfo("Ready to classify groups")
         rospy.spin()
-        rospy.loginfo("Stopped TPC classification  service")
+        rospy.loginfo("Stopped SA classification  service")
     
     def handle_group_classification(self,req):
 
         rospy.loginfo("Classifying group...")
 
+        # Get QSR description for scene using service
+        qsr_req = GetQSRDescriptionRequest()
+        qsr_req.object_id = req.object_id
+        qsr_req.pose = req.pose
+        qsr_req.bbox = req.bbox
+        qsr_res = self.qsr_desc(qsr_req)
+        print(json.loads(qsr_res.predicates))
+
+        # Create response
         res = GetGroupClassificationResponse()
 
         res.group_classification = list()
     
+        # Fake perception as there is none
+        # - uniform
+        # - according to object occurrences
+        # - ground truth as input
         for obj in req.object_id:
         
             obj_classification = ObjectClassification()
@@ -224,7 +184,8 @@ class TPCClassifier():
                 obj_classification.confidence.append(random.uniform(0,1))
 
             res.group_classification.append(obj_classification)
-
+        
+            
         state = []
         for obj_cls in res.group_classification:
             max_idx = obj_cls.confidence.index(max(obj_cls.confidence))
@@ -234,9 +195,9 @@ class TPCClassifier():
         positions = []
         for pos in req.pose:
             positions.append([pos.position.x, pos.position.y])
-
-
-        gc = GroupClassification(state, positions, req.type, self.gmm_cache)
+    
+        
+        gc = GroupClassification(state, positions, req.type)
     
         best_state = simulated_annealing(gc, exp_schedule(k=20, lam=0.005, limit=10000))
 
@@ -258,16 +219,6 @@ class TPCClassifier():
             obj_classification.confidence.append(1.0)
 
             res.group_classification.append(obj_classification)
-
-
-        
-        # obj = random.choice(["Cup", "Keyboard"])
-        # x   = random.uniform(-1.0,1.0)
-        # y   = random.uniform(-1.0,1.0)
-        # print obj, x, y, "=> GMM value:", self.value(obj,"Monitor",[x,y])
-
-        # cache the GMMs for the next service call
-        self.gmm_cache = gc.gmm_cache
         
         rospy.loginfo("Waiting for next request...")
 
@@ -276,5 +227,5 @@ class TPCClassifier():
     
 
 if __name__ == "__main__":
-    tpcc = TPCClassifier()
+    sac = SAClassifier()
     
