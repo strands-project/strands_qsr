@@ -198,7 +198,7 @@ class TPCClassifier():
 
         self.gmm_cache = dict()
 
-        self.service = rospy.Service('tpc_group_classification', GetGroupClassification, self.handle_group_classification)
+        self.service = rospy.Service('group_classification', GetGroupClassification, self.handle_group_classification)
         rospy.loginfo("Ready to classify groups")
         rospy.spin()
         rospy.loginfo("Stopped TPC classification  service")
