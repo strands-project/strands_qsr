@@ -30,7 +30,7 @@ def handle_group_classification(req):
 
 def random_classification_server():
     rospy.init_node('random_classification_server')
-    s = rospy.Service('random_group_classification', GetGroupClassification, handle_group_classification)
+    s = rospy.Service('group_classification', GetGroupClassification, handle_group_classification)
     rospy.loginfo("Ready to classify groups")
     rospy.spin()
 
