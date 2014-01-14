@@ -124,11 +124,13 @@ class GroupClassification(Problem):
 
                     key_direc = [self.direc[tuple([self.object_id[i], self.object_id[j]])], state[i], state[j]]
                     key_direc_objs = [state[i], state[j]]
-                    val += (float(self.sac.get_count(self.sac.count_dir,tuple(key_direc))) / \
-                                (self.sac.get_count(self.sac.count_dir_objs, tuple(key_direc_objs)) + 1)) + \
-                                (float(self.sac.get_count(self.sac.count_dir,tuple(key_direc))) / \
-                                     (self.sac.get_count(self.sac.count_dir_rels, \
-                                                             self.direc[tuple([self.object_id[i], self.object_id[j]])]) + 1))
+
+                    rel1 = float(self.sac.get_count(self.sac.count_dir,tuple(key_direc)) / \
+                                     (self.sac.get_count(self.sac.count_dir_objs, tuple(key_direc_objs)) + 1))
+                    val +=  rel1 + \
+                        (float(self.sac.get_count(self.sac.count_dir,tuple(key_direc))) / \
+                             (self.sac.get_count(self.sac.count_dir_rels, \
+                                                     self.direc[tuple([self.object_id[i], self.object_id[j]])]) + 1))
 
                     key_dist = [self.dist[tuple([self.object_id[i], self.object_id[j]])], state[i], state[j]]
                     key_dist_objs = [state[i], state[j]]
@@ -139,6 +141,21 @@ class GroupClassification(Problem):
                                                          self.dist[tuple([self.object_id[i], self.object_id[j]])] ) + 1))
 
 
+                    # for k in range(len(state)):
+
+                    #     if k != i and k != j:
+
+                    #         key_direc = [self.direc[tuple([self.object_id[k], self.object_id[j]])], state[k], state[j]]
+                    #         key_direc_objs = [state[k], state[j]]
+
+                    #         val += rel1 * \
+                    #             float(self.sac.get_count(self.sac.count_dir,tuple(key_direc)) / \
+                    #                       (self.sac.get_count(self.sac.count_dir_objs, tuple(key_direc_objs)) + 1))
+                            
+    
+
+
+                            
         perception_weight = float(same_as_perception) / len(state)
 
         #print "**************", perception_weight
