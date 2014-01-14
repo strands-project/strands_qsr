@@ -154,7 +154,7 @@ def evaluate_scene(no,scn,init_method):
     req.bbox = list()
     req.group_classification = list()
 
-    gt_types = list()
+    gt_types = dict()
     
     obj_id = 0
     for obj in scn['objects']:
@@ -162,7 +162,7 @@ def evaluate_scene(no,scn,init_method):
         if scn['type'][obj] not in OBJ_TYPES:
             continue
 
-        gt_types.append(scn['type'][obj])
+        gt_types[obj] = scn['type'][obj]
 
         obj_name = 'obj' + str(obj_id)
         
@@ -208,7 +208,7 @@ def evaluate_scene(no,scn,init_method):
 
         max_idx = res.group_classification[i].confidence.index(max(res.group_classification[i].confidence))
         cls = res.group_classification[i].type[max_idx] 
-        gt  = gt_types[i] # scn['type'][scn['objects'][i]]
+        gt  = gt_types[res.group_classification[i].object_id] # scn['type'][scn['objects'][i]]
 
         #print res.group_classification[i]
         #print max_idx
