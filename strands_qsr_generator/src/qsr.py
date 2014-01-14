@@ -6,7 +6,8 @@ PARTITION_SIZE = (2.0 * math.pi) / NUMBER_OF_PARTITIONS
 
 def relative_radius(a, b, c):
     # compute relative radius r (close/distant)
-    return math.sqrt( math.pow(c[0] - b[0],2.0) +  math.pow(c[1] - b[1],2.0) +  math.pow(c[2] - b[2],2.0))/ math.sqrt( math.pow(b[0] - a[0],2.0) +  math.pow(b[1] - a[1],2.0) +  math.pow(b[2] - a[2],2.0))
+    return math.sqrt( math.pow(c[0] - b[0],2.0) +  math.pow(c[1] - b[1],2.0) +  math.pow(c[2] - b[2],2.0))
+    #return math.sqrt( math.pow(c[0] - b[0],2.0) +  math.pow(c[1] - b[1],2.0) +  math.pow(c[2] - b[2],2.0))/ math.sqrt( math.pow(b[0] - a[0],2.0) +  math.pow(b[1] - a[1],2.0) +  math.pow(b[2] - a[2],2.0))
   
 
 def relative_angle(a, b, c):
@@ -74,26 +75,34 @@ def argmax_partition(angle):
 
 def partition_name(p):
     if p == 0:
-        return ['behind']
+        return ['center_behind']
     elif p == 1:
-        return ['behind','left']
+        return ['left_behind']
     elif p == 2:
-        return ['left']
+        return ['left_center']
     elif p == 3:
-        return ['front','left']
+        return ['left_front']
     elif p == 4:
-        return ['front']
+        return ['center_front']
     elif p == 5:
-        return ['front','right']
+        return ['right_front']
     elif p == 6:
-        return ['right']
+        return ['right_center']
     else: # p ==7
-        return ['behind','right']
+        return ['right_behind']
 
 def distance(dist):
-    if 0.0 <= dist and dist < 0.3:
+
+    if dist >= 0.98874488958:
+        return 'distant'
+    elif dist >= 0.573403549226 and dist < 0.98874488958:
         return 'close'
-    return 'distant'
+    else:
+        return 'very_close'
+   
+#    if 0.0 <= dist and dist < 0.3:
+#        return 'close'
+#    return 'distant'
   
 
 def calc_QSR(camera, landmark, obj):
