@@ -30,6 +30,29 @@ OBJ_TYPES = ['Bottle',
              'Stapler',
              'Telephone']
 
+OBJ_TYPES = [ 'Mug', # 
+             'Mouse',
+             'Monitor',
+             'Keyboard',
+             'Bottle',
+             'Papers', #
+             'Book',
+             'Lamp',
+             'Laptop',
+             'Glass', #
+             'PenStand', #
+             'Jug', #
+             'Headphones', #
+             'Telephone',
+             'Highlighter', #
+             'Marker', #
+             'Notebook', #
+             'Folder', #
+             'Flask', #
+             'Mobile', #
+             'Pen']
+
+
 
 def classification_client(request):
     service_name = 'group_classification'
@@ -109,8 +132,8 @@ def evaluate_scene(no,scn,perception_distribution):
             bbox.point.append(point)
             
         req.bbox.append(bbox)
-
-        req.group_classification.append(gen_object_classification(obj,scn['type'],perception_distribution))
+        classification = gen_object_classification(obj,scn['type'],perception_distribution)
+        req.group_classification.append(classification)
              
 
     res = classification_client(req)
@@ -148,7 +171,7 @@ def evaluate_scene(no,scn,perception_distribution):
     performance = float(tp) / float((len(res.group_classification) - other))
     print no, "Performance:", performance
 
-    return performance
+    return (tp, len(res.group_classification))  # performance
 
 def inc_count(dic, key):
 
@@ -201,11 +224,14 @@ if __name__ == "__main__":
         scenes = json.load(scn_file)
         
         sum_p = 0.0
-        
-        for i in range(start,end + 1):
-            sum_p += evaluate_scene(i, scenes[i], perception_distribution)
+        tot = 0
+        for oi in range(0, 1):
+            for i in range(start,end + 1):
+                p, t = evaluate_scene(i, scenes[i], perception_distribution)
+                sum_p += p
+                tot += t
 
-        avg_p = sum_p / num_of_scenes
+        avg_p = sum_p / tot #num_of_scenes
             
         print "Average performance:", avg_p
 
