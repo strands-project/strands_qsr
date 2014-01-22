@@ -12,23 +12,35 @@ from geometry_msgs.msg import *
 
 import perception
 
-OBJ_TYPES = ['Bottle',
-             'Book',
-             'Calculator',
-             'Cup',
-             'PC',
-             'Glass',
-             'Headphone',
+#OBJ_TYPES = ['Bottle',
+ #            'Book',
+ #            'Calculator',
+ #            'Cup',
+ #            'PC',
+ #            'Glass',
+ #            'Headphone',
+ #            'Keyboard',
+ #            'Keys',
+ #            'Lamp',
+ #            'Laptop',
+ #            'MobilePhone',
+ #            'Monitor',
+ #            'Mouse',
+ #            'Pencil',
+ #            'Stapler',
+ #            'Telephone']
+
+OBJ_TYPES = ['Monitor',
              'Keyboard',
-             'Keys',
-             'Lamp',
-             'Laptop',
-             'MobilePhone',
-             'Monitor',
              'Mouse',
-             'Pencil',
-             'Stapler',
-             'Telephone']
+             'Papers',
+             'Book',
+             'Notebook',
+	     'Mobile',
+             'Mug',
+             'Glass',
+             'Flask',
+             'Jug']
 
 OBJ_TYPES = [ 'Mug', # 
              'Mouse',
@@ -55,7 +67,7 @@ OBJ_TYPES = [ 'Mug', #
 
 
 def classification_client(request):
-    service_name = 'group_classification'
+    service_name = 'spatial_relation_classifier'
     rospy.wait_for_service(service_name)
     try:
         get_group_classification = rospy.ServiceProxy(service_name, GetGroupClassification)
@@ -200,6 +212,7 @@ if __name__ == "__main__":
         #sys.exit(0)
         
     perception_distribution = None
+
     for i in range(1, 101):
         if init_method == "ground_truth_{}".format(i):
             perception_distribution =  p = perception.PerceptionProb.create_simple(OBJ_TYPES, i/100.0)

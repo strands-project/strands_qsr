@@ -13,6 +13,8 @@ def handle_group_classification(req):
     res.group_classification = list()
     
     for obj in req.object_id:
+
+        print "Adding new object"
         
         obj_classification = ObjectClassification()
 

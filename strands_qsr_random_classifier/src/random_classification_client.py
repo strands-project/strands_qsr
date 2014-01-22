@@ -9,7 +9,7 @@ from strands_qsr_msgs.srv import *
 from geometry_msgs.msg import *
 
 def random_classification_client(request):
-    service_name = 'random_group_classification'
+    service_name = 'group_classification'
     rospy.wait_for_service(service_name)
     try:
         get_group_classification = rospy.ServiceProxy(service_name, GetGroupClassification)
