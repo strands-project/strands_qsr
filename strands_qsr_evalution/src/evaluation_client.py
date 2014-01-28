@@ -89,24 +89,31 @@ def evaluate_scene(scene, perception, object_types):
 
     res = classification_client(req)
 
-    # The restults
-    ground_truth = []
-    perception = []
-    relations = []
+    # The results
+    ground_truth = {}
+    percept = {}
+    relations = {}
 
     for i in range(len(res.group_classification)):
-
-        scores = zip(res.group_classification[i].confidence,
-                     res.group_classification[i].type)
+        obj_id = res.group_classification[i].object_id
+        scores = zip(res.group_classification[i].type,
+                     res.group_classification[i].confidence)
         random.shuffle(scores)
-        confidence, cls = max(scores, key=lambda x:x[0])
+        cls, confidence = max(scores, key=lambda x:x[1])
         
-        ground_truth.append(gt_types[res.group_classification[i].object_id])
-        perception.append(percept_types[res.group_classification[i].object_id])
-        relations.append(cls)
+        relations[obj_id] = dict(scores)
+        
+        scores = zip(perception[obj_id]["type"],
+                     perception[obj_id]["confidence"])
+
+        percept[obj_id] = dict(scores)
+        
+        scores = dict(zip(perception[obj_id]["type"], [0]*len(perception[obj_id]["type"])))
+        scores[gt_types[res.group_classification[i].object_id]] = 1
+        ground_truth[obj_id] = scores
 
     
-    return ground_truth, perception, relations
+    return ground_truth, percept, relations
 
         
 if __name__ == "__main__":
@@ -151,8 +158,6 @@ if __name__ == "__main__":
 
     object_types = perceptions["_meta"]["objects"]
     
-    print "Running with object types from perception file:", object_types
-
     if os.path.exists(options.output_filename):
         print "ERROR: output file already exists; not proceeding."
         sys.exit(1)
@@ -165,17 +170,40 @@ if __name__ == "__main__":
     for scene in scenes:
         gt, pc, rl = evaluate_scene(scene, perceptions[scene['scene_id']],
                               object_types)
-        sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
-        sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
-        total += len(gt)
-        print scene['scene_id'], sum([1 if g==r else 0 for g, r in zip(gt, rl)]), "/", len(gt)
+        for o in gt.keys():
+            truth = max(gt[o].items(), key=lambda x:x[1])[0]
+            percept = max(pc[o].items(), key=lambda x:x[1])[0]
+            relate = max(rl[o].items(), key=lambda x:x[1])[0]
+            if truth == percept:
+                sum_perception += 1
+            if truth == relate:
+                sum_relations += 1
+            total += 1
+        #sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
+        #sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
+        #total += len(gt)
+        #print scene['scene_id'], sum([1 if g==r else 0 for g, r in zip(gt, rl)]), "/", len(gt)
         
         outfile.write("--\n")
         outfile.write(scene['scene_id']+"\n")
-        for s in [gt, pc, rl]:
-            for i in s:
-                outfile.write(i + "\t")
+        for (text, scores) in [("ground-truth", gt), ("perception", pc),
+                          ("percep+rel", rl)]:
+            outfile.write("%s\n"%text)
+            outfile.write("#######\t")
+            for k in object_types:
+                outfile.write(k+"\t")
             outfile.write("\n")
+            for obj in scene['objects']:
+                outfile.write(obj+"\t")
+                for k in object_types:
+                    if not scores[obj].has_key(k):
+                        outfile.write("0.0")
+                    else:
+                        outfile.write("%f"%scores[obj][k])
+                        
+                    outfile.write("\t")
+                outfile.write("\n")
+        
         
     outfile.close()
 
