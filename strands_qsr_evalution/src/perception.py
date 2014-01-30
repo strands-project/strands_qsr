@@ -93,6 +93,27 @@ class PerceptionProb(object):
                     p.prob_perceive_given_state[o][o2] = (1.0 - prob) / (len(objects) - 1)
         isinstance(p, PerceptionProb)
         return p
+    
+    @staticmethod
+    def is_valid_model(model_name):
+        """
+        Checks if the model is a known perception model
+		
+        :Parameters:
+            model_name : string
+                model name to check existence of
+        """
+        valid_names = [i for i, v in globals().items()
+                       if type(v) == list and len(v) == 2 and type(v) == list]
+        return model_name in valid_names
+    
+    @staticmethod
+    def get_library_model_names():
+        """
+        Return a list of known model names
+		"""
+        return [i for i, v in globals().items()
+                       if type(v) == list and len(v) == 2 and type(v) == list]
         
     @classmethod
     def create_from_library(cls, entry):

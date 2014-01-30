@@ -10,25 +10,8 @@ from strands_qsr_msgs.srv import *
 
 from geometry_msgs.msg import *
 
-import perception
-
-OBJ_TYPES = ['Bottle',
-             'Book',
-             'Calculator',
-             'Cup',
-             'PC',
-             'Glass',
-             'Headphone',
-             'Keyboard',
-             'Keys',
-             'Lamp',
-             'Laptop',
-             'MobilePhone',
-             'Monitor',
-             'Mouse',
-             'Pencil',
-             'Stapler',
-             'Telephone']
+from optparse import OptionParser
+import os
 
 
 def classification_client(request):
@@ -41,31 +24,12 @@ def classification_client(request):
     except rospy.ServiceException, e:
         print "Service call failed: %s"%e
 
-def gen_object_classification(obj,types,perception_distribution):
 
-    # Fake object perception
-    # - purely random
-    # - based on object occurrences throughout scenes
-    # - ground truth
-
-    obj_classification = ObjectClassification()
-    
-    obj_classification.type  = list()
-    obj_classification.confidence  = list()
-    obj_classification.object_id = obj
-    
-    conf =  perception_distribution.create_perception({obj: types[obj],})
-    obj_classification.type = perception_distribution.object_types
-    obj_classification.confidence = conf[obj]
-
-    return obj_classification
-
-
-def evaluate_scene(no,scn,perception_distribution):
+def evaluate_scene(scene, perception, object_types):
 
     req = GetGroupClassificationRequest()
 
-    req.type = OBJ_TYPES
+    req.type = object_types
     
     req.object_id = list()
     req.pose = list()
@@ -73,14 +37,15 @@ def evaluate_scene(no,scn,perception_distribution):
     req.group_classification = list()
 
     gt_types = dict()
+    percept_types = dict()
     
     obj_id = 0
-    for obj in scn['objects']:
+    for obj in scene['objects']:
 
-        if scn['type'][obj] not in OBJ_TYPES:
+        if scene['type'][obj] not in object_types:
             continue
 
-        gt_types[obj] = scn['type'][obj]
+        gt_types[obj] = scene['type'][obj]
 
         obj_name = 'obj' + str(obj_id)
         
@@ -88,19 +53,19 @@ def evaluate_scene(no,scn,perception_distribution):
         obj_id += 1
         
         pose = Pose()
-        pose.position.x = scn['position'][obj][0]
-        pose.position.y = scn['position'][obj][1]
-        pose.position.z = scn['position'][obj][2]
+        pose.position.x = scene['position'][obj][0]
+        pose.position.y = scene['position'][obj][1]
+        pose.position.z = scene['position'][obj][2]
         
-        pose.orientation.w = scn['orientation'][obj][0]
-        pose.orientation.x = scn['orientation'][obj][1]
-        pose.orientation.y = scn['orientation'][obj][2]
-        pose.orientation.z = scn['orientation'][obj][3]
+        pose.orientation.w = scene['orientation'][obj][0]
+        pose.orientation.x = scene['orientation'][obj][1]
+        pose.orientation.y = scene['orientation'][obj][2]
+        pose.orientation.z = scene['orientation'][obj][3]
 
         req.pose.append(pose)
             
         bbox = BBox()
-        points = scn['bbox'][obj]
+        points = scene['bbox'][obj]
         for p in points:
             point = Point32()
             point.x = p[0]
@@ -109,105 +74,138 @@ def evaluate_scene(no,scn,perception_distribution):
             bbox.point.append(point)
             
         req.bbox.append(bbox)
-
-        req.group_classification.append(gen_object_classification(obj,scn['type'],perception_distribution))
+        
+        obj_classification = ObjectClassification()
+        obj_classification.object_id = obj
+        obj_classification.type = perception[obj]["type"]
+        obj_classification.confidence= perception[obj]["confidence"]
+        
+        scores = zip(perception[obj]["type"],   perception[obj]["confidence"])
+        random.shuffle(scores)
+        percept_types[obj], conf = max(scores, key=lambda x:x[1])
+        
+        req.group_classification.append(obj_classification)
              
 
     res = classification_client(req)
 
-
-    # evaluation of the classification result
-    tp = 0
-    fn = 0
-
-    other = 0
+    # The results
+    ground_truth = {}
+    percept = {}
+    relations = {}
 
     for i in range(len(res.group_classification)):
-
-        max_idx = res.group_classification[i].confidence.index(max(res.group_classification[i].confidence))
-        cls = res.group_classification[i].type[max_idx] 
-        gt  = gt_types[res.group_classification[i].object_id] # scn['type'][scn['objects'][i]]
-
-        #print res.group_classification[i]
-        #print max_idx
-        print cls, '(', gt, ')', 
-        print "confidence=", res.group_classification[i].confidence[max_idx]
-            
-        if gt not in req.type:
-            other += 1
-
-        if cls == gt:
-            tp += 1
-        else:
-            fn += 1
-            
-    print no, "True positives:", tp
-    print no, "False negative:", fn
-    print no, "Other:", other
-    
-    performance = float(tp) / float((len(res.group_classification) - other))
-    print no, "Performance:", performance
-
-    return performance
-
-def inc_count(dic, key):
-
-    if key not in dic:
-        dic[key] = 1
-    else:
-        dic[key] += 1
+        obj_id = res.group_classification[i].object_id
+        scores = zip(res.group_classification[i].type,
+                     res.group_classification[i].confidence)
+        random.shuffle(scores)
+        cls, confidence = max(scores, key=lambda x:x[1])
         
+        relations[obj_id] = dict(scores)
+        
+        scores = zip(perception[obj_id]["type"],
+                     perception[obj_id]["confidence"])
 
-def usage():
-    return ("\nevaluation_client.py <scene_file> <init_method> <start> <end>\n"
-            "\n\t<scene_file>\tfile of test scenes\n"
-            "\t<init_method>\tmethod to initialize object classes [random, occurrence, ground_truth_N, ~library~]\n"
-            "\t<start>\t\tfirst scene to evaluate\n\t<end>\t\tlast scene to evaluate (optional)\n")
+        percept[obj_id] = dict(scores)
+        
+        scores = dict(zip(perception[obj_id]["type"], [0]*len(perception[obj_id]["type"])))
+        scores[gt_types[res.group_classification[i].object_id]] = 1
+        ground_truth[obj_id] = scores
+
+    
+    return ground_truth, percept, relations
 
         
 if __name__ == "__main__":
+   
+    parser = OptionParser()
+    parser.add_option("-p", "--perception_filename", dest="perception_filename",
+                      help="read perceptions from FILE", metavar="FILE")
+    parser.add_option("-s", "--scenes",
+                      dest="scenes_filename", metavar="FILE", 
+                      help="load the scenes from FILE")
+    parser.add_option("-o", "--output",
+                      dest="output_filename", metavar="FILE", 
+                      help="store results in FILE")
+    
+    parser.add_option("-O", "--overwrite",
+                      action="store_true", dest="overwrite", default=False, 
+                      help="overwrite output file if already exists.")
+    
+    (options, args) = parser.parse_args()
 
-    if not (len(sys.argv) == 4 or len(sys.argv) == 5):
-        print usage()
-        sys.exit(0)
-
-    init_method = sys.argv[2]
-    #if not init_method in ['random', 'occurrence', 'ground_truth', 'ground_truth_60', 'ground_truth_70','ground_truth_80','ground_truth_90']:
-        #print usage()
-        #sys.exit(0)
+    if not options.output_filename:
+        parser.error("output file name is required")
+    if not options.scenes_filename:
+        parser.error("scenes file name is required")
+    if not options.perception_filename:
+        parser.error("a perception file must be specified.")
+    
+    if not os.path.isfile(options.scenes_filename):
+        print "ERROR: scene file does not exist"
+        sys.exit(1)
         
-    perception_distribution = None
-    for i in range(1, 101):
-        if init_method == "ground_truth_{}".format(i):
-            perception_distribution =  p = perception.PerceptionProb.create_simple(OBJ_TYPES, i/100.0)
-            break
-    else:
-        if init_method == "random":
-            perception_distribution =  p = perception.PerceptionProb.create_simple(OBJ_TYPES, 1.0/len(OBJ_TYPES))
-        else:
-            perception_distribution =  p = perception.PerceptionProb.create_from_library(init_method)
-            
-        
-        
-    with open(sys.argv[1]) as scn_file:
-
-        start = int(sys.argv[3])
-        end = start
-        if len(sys.argv) == 5:
-            end = int(sys.argv[4])
-            
-        num_of_scenes = end - start + 1
-
+    with open(options.scenes_filename) as scn_file:
         scenes = json.load(scn_file)
         
-        sum_p = 0.0
+    if not os.path.isfile(options.perception_filename):
+        print "ERROR: perception file does not exist"
+        sys.exit(1)
         
-        for i in range(start,end + 1):
-            sum_p += evaluate_scene(i, scenes[i], perception_distribution)
+    with open(options.perception_filename) as p_file:
+        perceptions = json.load(p_file)
+        
 
-        avg_p = sum_p / num_of_scenes
-            
-        print "Average performance:", avg_p
+    object_types = perceptions["_meta"]["objects"]
+    
+    if os.path.exists(options.output_filename):
+        print "ERROR: output file already exists; not proceeding."
+        sys.exit(1)
+    
+    outfile = open(options.output_filename, "w")
+    
+    sum_perception = 0
+    sum_relations = 0
+    total = 0
+    for scene in scenes:
+        gt, pc, rl = evaluate_scene(scene, perceptions[scene['scene_id']],
+                              object_types)
+        for o in gt.keys():
+            truth = max(gt[o].items(), key=lambda x:x[1])[0]
+            percept = max(pc[o].items(), key=lambda x:x[1])[0]
+            relate = max(rl[o].items(), key=lambda x:x[1])[0]
+            if truth == percept:
+                sum_perception += 1
+            if truth == relate:
+                sum_relations += 1
+            total += 1
+        #sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
+        #sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
+        #total += len(gt)
+        #print scene['scene_id'], sum([1 if g==r else 0 for g, r in zip(gt, rl)]), "/", len(gt)
+        
+        outfile.write("--\n")
+        outfile.write(scene['scene_id']+"\n")
+        for (text, scores) in [("ground-truth", gt), ("perception", pc),
+                          ("percep+rel", rl)]:
+            outfile.write("%s\n"%text)
+            outfile.write("#######\t")
+            for k in object_types:
+                outfile.write(k+"\t")
+            outfile.write("\n")
+            for obj in scene['objects']:
+                outfile.write(obj+"\t")
+                for k in object_types:
+                    if not scores[obj].has_key(k):
+                        outfile.write("0.0")
+                    else:
+                        outfile.write("%f"%scores[obj][k])
+                        
+                    outfile.write("\t")
+                outfile.write("\n")
+        
+        
+    outfile.close()
 
-                
-                
+    print "Perception performance:", 100 * (sum_perception / float(total))
+    print "Relations performance:", 100 * (sum_relations/ float(total))
