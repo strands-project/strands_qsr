@@ -61,6 +61,8 @@ if __name__ == "__main__":
         
     with open(options.scenes_filename) as scn_file:
         scenes = json.load(scn_file)
+
+
         
     if options.all_objects:
         # consider all objects in scenes
@@ -99,23 +101,25 @@ if __name__ == "__main__":
     winner = looser = 0
     generated_perception = {}
     for scene in scenes:
-        generated_perception[scene['scene_id']] = {}
-        for obj in scene['objects']:
-            if scene['type'][obj] not in options.object_types:
-                continue
-            truth = scene['type'][obj]
-            conf = perception_distribution.create_perception({obj: scene['type'][obj],})
-            scores = zip(conf[obj],  perception_distribution.object_types)
-            random.shuffle(scores)
-            percept = max(scores, key=lambda x: x[0])[1]
-            if percept == truth:
-                winner += 1
-            else:
-                looser += 1
-            generated_perception[scene['scene_id']][obj] = {}
-            generated_perception[scene['scene_id']][obj]['object_id'] = obj
-            generated_perception[scene['scene_id']][obj]['type'] = perception_distribution.object_types
-            generated_perception[scene['scene_id']][obj]['confidence'] = conf[obj]
+	## add check if is a scene for new data format
+	if scene.get('scene_id'):
+		generated_perception[scene['scene_id']] = {}
+		for obj in scene['objects']:
+		    if scene['type'][obj] not in options.object_types:
+		        continue
+		    truth = scene['type'][obj]
+		    conf = perception_distribution.create_perception({obj: scene['type'][obj],})
+		    scores = zip(conf[obj],  perception_distribution.object_types)
+		    random.shuffle(scores)
+		    percept = max(scores, key=lambda x: x[0])[1]
+		    if percept == truth:
+		        winner += 1
+		    else:
+		        looser += 1
+		    generated_perception[scene['scene_id']][obj] = {}
+		    generated_perception[scene['scene_id']][obj]['object_id'] = obj
+		    generated_perception[scene['scene_id']][obj]['type'] = perception_distribution.object_types
+		    generated_perception[scene['scene_id']][obj]['confidence'] = conf[obj]
 
     generated_perception['_meta'] = {}
     generated_perception['_meta']['perception_type'] = init_method
