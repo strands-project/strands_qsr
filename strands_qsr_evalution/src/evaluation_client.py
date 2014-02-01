@@ -15,7 +15,7 @@ import os
 
 
 def classification_client(request):
-    service_name = 'group_classification'
+    service_name = 'classifier_name'
     rospy.wait_for_service(service_name)
     try:
         get_group_classification = rospy.ServiceProxy(service_name, GetGroupClassification)
@@ -168,41 +168,45 @@ if __name__ == "__main__":
     sum_relations = 0
     total = 0
     for scene in scenes:
-        gt, pc, rl = evaluate_scene(scene, perceptions[scene['scene_id']],
-                              object_types)
-        for o in gt.keys():
-            truth = max(gt[o].items(), key=lambda x:x[1])[0]
-            percept = max(pc[o].items(), key=lambda x:x[1])[0]
-            relate = max(rl[o].items(), key=lambda x:x[1])[0]
-            if truth == percept:
-                sum_perception += 1
-            if truth == relate:
-                sum_relations += 1
-            total += 1
-        #sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
-        #sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
-        #total += len(gt)
-        #print scene['scene_id'], sum([1 if g==r else 0 for g, r in zip(gt, rl)]), "/", len(gt)
-        
-        outfile.write("--\n")
-        outfile.write(scene['scene_id']+"\n")
-        for (text, scores) in [("ground-truth", gt), ("perception", pc),
-                          ("percep+rel", rl)]:
-            outfile.write("%s\n"%text)
-            outfile.write("#######\t")
-            for k in object_types:
-                outfile.write(k+"\t")
-            outfile.write("\n")
-            for obj in scene['objects']:
-                outfile.write(obj+"\t")
-                for k in object_types:
-                    if not scores[obj].has_key(k):
-                        outfile.write("0.0")
-                    else:
-                        outfile.write("%f"%scores[obj][k])
-                        
-                    outfile.write("\t")
-                outfile.write("\n")
+
+	## check if it is a scene for new data format
+	if scene.get('scene_id'):
+
+		gt, pc, rl = evaluate_scene(scene, perceptions[scene['scene_id']],
+		                      object_types)
+		for o in gt.keys():
+		    truth = max(gt[o].items(), key=lambda x:x[1])[0]
+		    percept = max(pc[o].items(), key=lambda x:x[1])[0]
+		    relate = max(rl[o].items(), key=lambda x:x[1])[0]
+		    if truth == percept:
+		        sum_perception += 1
+		    if truth == relate:
+		        sum_relations += 1
+		    total += 1
+		#sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
+		#sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
+		#total += len(gt)
+		#print scene['scene_id'], sum([1 if g==r else 0 for g, r in zip(gt, rl)]), "/", len(gt)
+		
+		outfile.write("--\n")
+		outfile.write(scene['scene_id']+"\n")
+		for (text, scores) in [("ground-truth", gt), ("perception", pc),
+		                  ("percep+rel", rl)]:
+		    outfile.write("%s\n"%text)
+		    outfile.write("#######\t")
+		    for k in object_types:
+		        outfile.write(k+"\t")
+		    outfile.write("\n")
+		    for obj in scene['objects']:
+		        outfile.write(obj+"\t")
+		        for k in object_types:
+		            if not scores[obj].has_key(k):
+		                outfile.write("0.0")
+		            else:
+		                outfile.write("%f"%scores[obj][k])
+		                
+		            outfile.write("\t")
+		        outfile.write("\n")
         
         
     outfile.close()
