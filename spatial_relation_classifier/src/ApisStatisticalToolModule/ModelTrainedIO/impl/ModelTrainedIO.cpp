@@ -7,8 +7,8 @@
 
 #include "ModelTrainedIO.hpp"
 
-#define TESTFLAG 1
-#define DEBUG 1
+#define TESTFLAG 0
+#define DEBUG 0
 
 
 
@@ -90,7 +90,10 @@ void ModelTrainedIO::loadMeanNormalizationSingleObjectFile(string folder, Test &
 	}
 
 	else { cout << "Unable to open file"; }
-	cout << endl << " meanNormalizationSingleObject : The size of results is: " << meanNormalizationSingleObject.size() << endl;
+
+	if (TESTFLAG) {
+		cout << endl << " meanNormalizationSingleObject : The size of results is: " << meanNormalizationSingleObject.size() << endl;
+	}
 }
 
 
@@ -794,7 +797,10 @@ void ModelTrainedIO::loadStdNormalizationSingleObjectFile(string folder, Test & 
 	}
 
 	else { cout << "Unable to open file"; }
-	cout << endl << " stdNormalizationSingleObject : The size of results is: " << vectorstore.size() << endl;
+
+	if (TESTFLAG) {
+		cout << endl << " stdNormalizationSingleObject : The size of results is: " << vectorstore.size() << endl;
+	}
 }
 
 
@@ -836,7 +842,9 @@ void ModelTrainedIO::loadMinFeatSingleObjectFile(string folder, Test & test) {
 	}
 
 	else { cout << "Unable to open file"; }
-	cout << endl << " minFeatSingleObject : The size of results is: " << vectorstore.size() << endl;
+	if (TESTFLAG) {
+		cout << endl << " minFeatSingleObject : The size of results is: " << vectorstore.size() << endl;
+	}
 }
 
 
@@ -878,7 +886,9 @@ void ModelTrainedIO::loadMaxFeatSingleObjectFile(string folder, Test & test) {
 	}
 
 	else { cout << "Unable to open file"; }
-	cout << endl << " maxFeatSingleObject : The size of results is: " << vectorstore.size() << endl;
+	if (TESTFLAG) {
+		cout << endl << " maxFeatSingleObject : The size of results is: " << vectorstore.size() << endl;
+	}
 }
 
 
@@ -943,8 +953,9 @@ void ModelTrainedIO::loadMeanNormalizationObjectPairFile(string folder, Test & t
 
 	else { cout << "Unable to open file"; }
 
-	cout << "Before storing in the final data structure" << endl;
-
+	if (TESTFLAG) {
+		cout << "Before storing in the final data structure" << endl;
+	}
 	// arrange this data into the vector of vector of vector of double
 
 	vector < vector < vector <double > > > savevector;
@@ -1944,8 +1955,9 @@ void ModelTrainedIO::loadThresholdSingleObject(string folder, Test & test) {
 	}
 
 	else { cout << "Unable to open file"; }
-	cout << endl << " ThresholdSingleObject : The size of results is: " << vectorstore.size() << endl;
-
+	if (TESTFLAG) {
+		cout << endl << " ThresholdSingleObject : The size of results is: " << vectorstore.size() << endl;
+	}
 
 }
 

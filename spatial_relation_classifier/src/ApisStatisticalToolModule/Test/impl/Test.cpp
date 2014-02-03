@@ -791,15 +791,33 @@ vector<strands_qsr_msgs::ObjectClassification> Test::voting(ArrangeFeatureTestSc
 		resultsPath[objectInstanceId] = categoryLabel;
 	}
 
-	printPath(resultsPath);
+	// printPath(resultsPath);
+
+	// **********************************************************************
+	// Convert to binary output
+
+	vector<vector<double> > votingTableBinary;
+	// for each row of the voting table = for each test object
+	for (int i = 0; i < votingTable.size(); i++) {
+		vector<double> outRow;
+
+		for (int j = 0; j <  votingTable.at(i).size(); j++) {
+			outRow.push_back(0);			
+		}
+
+		vector<double> currentRow = votingTable.at(i);
+		int maxCategoryLabel = computeMaximum(currentRow);
+		outRow.at(maxCategoryLabel) = 1;
+		votingTableBinary.push_back(outRow);
+	}
 
 
 	// conversion output into the format of the response of the ROS service
 
 	vector<strands_qsr_msgs::ObjectClassification> objectClassificationMsgsList;
 
-    // for each row of the voting table = for each test object
-	for (int i = 0; i < votingTable.size(); i++) {
+        // for each row of the voting table = for each test object
+	for (int i = 0; i < votingTableBinary.size(); i++) {
 
 		string objectInstanceName = listSOF.at(i).getInstanceName();
 
@@ -815,7 +833,8 @@ vector<strands_qsr_msgs::ObjectClassification> Test::voting(ArrangeFeatureTestSc
 
 			int currentCategory = categoryList.at(j);
 			string currentCategoryString = categoryListString.at(j);
-			double score = votingTable.at(i).at(currentCategory);
+			double score = votingTableBinary.at(i).at(currentCategory);
+			// scores.push_back(score);
 
 			currentObjectClassificationMsg.type.push_back(currentCategoryString);
 			currentObjectClassificationMsg.confidence.push_back((float)score);

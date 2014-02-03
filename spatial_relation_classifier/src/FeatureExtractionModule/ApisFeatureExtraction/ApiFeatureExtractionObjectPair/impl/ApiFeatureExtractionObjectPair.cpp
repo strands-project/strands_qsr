@@ -48,6 +48,20 @@ void ApiFeatureExtractionObjectPair::computeEuclideanDistance(Object & refObject
   pcl::PointXYZ centroidTargetObject = targetObject.getCentroid();
   EuclideanDistance = pcl::euclideanDistance( centroidReferenceObject, centroidTargetObject);
 
+	if (EuclideanDistance > 1000) {
+	 
+	  cout << " Euclidean distance is " <<EuclideanDistance << endl;
+
+	  cout << "   when REFobject centroid x = "
+		 << (refObject.getCentroid()).x << " and  y = "
+		 << (refObject.getCentroid()).y << endl;
+	      cout << " and TARGETobject centroid x = "
+		 << (targetObject.getCentroid()).x << " and y = "
+		 << (targetObject.getCentroid()).y << "    " <<(targetObject.getCentroid()).y << endl;
+
+	 //  exit(0);
+	}
+
 }
 
 
@@ -114,7 +128,13 @@ void ApiFeatureExtractionObjectPair::computeSizeDifference(Object & refObject, O
   float dim3r = pcl::euclideanDistance(referenceBoundingBox.points[4], referenceBoundingBox.points[0]);
   float sizeReference = (dim1r * dim2r * dim3r);
 
-  sizeDifference = sizeTarget / sizeReference;
+  if (sizeReference != 0) {
+	  sizeDifference = sizeTarget / sizeReference;
+  }
+  else {
+	   cout << "Error: one volume is zero! " << endl;
+	  sizeDifference = 30;
+  }
 
   if (DEBUG)  {
     cout << "The difference is SIZE between the 2 objects is : " << sizeDifference << endl;

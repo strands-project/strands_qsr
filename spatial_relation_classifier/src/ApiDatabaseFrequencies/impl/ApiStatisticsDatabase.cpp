@@ -79,8 +79,22 @@ vector<double> ApiStatisticsDatabase::computeFrequenciesSingleObject(DatabaseInf
 
 	  vector<double> freqratio;
 	  // freqratio.reserve(countObjectFrequencies.size());
+
+
+	
+
+
 	  for (int i = 0; i < countObjectFrequencies.size(); i++ ) {
-		  freqratio.push_back((double)(countObjectFrequencies.at(i)) / (double)nScenes);
+
+		  double numerator;
+		  if (countObjectFrequencies.at(i) > 0) {
+			numerator = (double) (countObjectFrequencies.at(i));
+		  }
+		  else {
+			numerator = 1;
+		  }
+
+		  freqratio.push_back( (double) (numerator) / (double)(nScenes + 1) );
 	  }
 
 	  if (TESTFLAG) {
@@ -193,7 +207,16 @@ vector<vector<double> > ApiStatisticsDatabase::computeFrequenciesObjectPair(Data
 	  for (int i = 0; i < countObjectPairFrequencies.size(); i++ ) {
 		  vector<double> tmp2;
 		  for (int j = 0; j < countObjectPairFrequencies.at(0).size(); j++) {
-			  tmp2.push_back( ((double)countObjectPairFrequencies.at(i).at(j)) / ((double)nScenes));
+
+
+			  double numerator;
+			  if (countObjectPairFrequencies.at(i).at(j) > 0) {
+				numerator = (double)(countObjectPairFrequencies.at(i).at(j) ) ;
+			  }
+			  else {
+				numerator = 1;
+			  }
+			  tmp2.push_back( numerator / ((double)(nScenes +1)));
 		  }
 		  freqratio.push_back(tmp2);
 	  }

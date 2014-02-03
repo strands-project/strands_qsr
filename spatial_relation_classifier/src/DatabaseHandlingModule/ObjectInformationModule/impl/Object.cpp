@@ -113,15 +113,7 @@ void Object::setInstanceName(string inputName) {
 }
 
 
-/*
- * TODO: change for the new dataset and use the "utils"
- * (or create a new similar) function
- * to convert from string category label into
- * int category label::
- *
- * actualObjectID = convertStringToIntCategoryLabel(inputName);
- *
- */
+
 void Object::setCategoryName(string inputName) {
 
   categoryName = inputName;

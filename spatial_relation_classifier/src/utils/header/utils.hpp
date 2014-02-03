@@ -38,5 +38,7 @@ int computeMaximumValue(vector<int> in);
 
 int convertStringToIntCategoryLabel(string stringLabel);
 vector<int> convertStringToIntCategoryLabelVector(vector<string> stringLabels);
+bool IsFiniteNumber(float x) ;
+
 
 #endif /* HEADER_HPP_ */
