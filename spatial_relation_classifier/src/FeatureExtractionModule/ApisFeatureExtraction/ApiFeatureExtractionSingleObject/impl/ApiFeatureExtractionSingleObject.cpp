@@ -79,7 +79,7 @@ void ApiFeatureExtractionSingleObject::extractFeaturesNoReference(Object & input
 		cout << "in ApiFeatureExtractionSingleObject 4" << endl;
 	}
 
-	computeVolumeSize(inputObject);
+	//computeVolumeSize(inputObject);
 
 	if (TESTFLAG) {
 		cout << "in ApiFeatureExtractionSingleObject 5" << endl;
@@ -103,8 +103,8 @@ void ApiFeatureExtractionSingleObject::extractFeaturesNoReference(Object & input
 
 	out.setPose(poseX, poseY, poseZ);
 	out.setAngle2dCentroid(angle2d);
-	//out.setAngle2d(angle2dCentroid);
-	out.setVolume(volumeSize);
+	// out.setAngle2d(angle2dCentroid);
+	// out.setVolume(volumeSize);
 	out.setSizeProjectedX(sizeProjectedX);
 	out.setSizeProjectedY(sizeProjectedY);
 	out.setSizeProjectedZ(sizeProjectedZ);

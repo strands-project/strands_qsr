@@ -52,7 +52,11 @@ void ApiConvertRealWorldDB::parseSceneJSON(boost::property_tree::ptree::value_ty
   // the scene will contain a list of objects;
   vector<Object> objectVector;
 
+
+
   BOOST_FOREACH (boost::property_tree::ptree::value_type& sceneField, sceneRoot.second) {
+
+
 
     // "type" field: contains the object category of each object and the "name" of each object
     if (strcmp(sceneField.first.c_str(), "type") == 0) {
@@ -90,6 +94,7 @@ void ApiConvertRealWorldDB::parseSceneJSON(boost::property_tree::ptree::value_ty
 
 
     // setting the position == centroid of each object
+	/*
 	 if (strcmp(sceneField.first.c_str(), "position") == 0) {
 
 			if (TESTFLAG) {
@@ -139,6 +144,7 @@ void ApiConvertRealWorldDB::parseSceneJSON(boost::property_tree::ptree::value_ty
 			 countObject++;
 		 }
 	 }
+	*/
 
 
    // setting the bounding box of each object
@@ -180,6 +186,9 @@ void ApiConvertRealWorldDB::parseSceneJSON(boost::property_tree::ptree::value_ty
 
         Object newObject;
 	newObject.setBoundingBox(boundingBoxVertices);
+
+	// if we want to set the centroid position computed using the vertices of the bounding box
+	newObject.setCentroid();  
 	objectVector.push_back(newObject);
 
 

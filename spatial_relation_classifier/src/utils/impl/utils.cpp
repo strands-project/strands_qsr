@@ -176,7 +176,7 @@ vector<string> storeFileNames(string dirname) {
  */
 int convertStringToIntCategoryLabel(string inputName) {
 
-	int datasetOption = 0;
+	int datasetOption = 2;
 	int intLabel;
         const char * nameChar = inputName.c_str();
 
@@ -214,6 +214,56 @@ int convertStringToIntCategoryLabel(string inputName) {
 		}
 		else if (strcmp(nameChar, "Jug")== 0 ) {
 			intLabel = 10;
+		}
+		else {
+			intLabel = -1;
+		}																																																																																																																																																												
+	}
+
+
+
+// Mouse' 'Keyboard' 'Monitor' 'Papers' 'Book' 'Notebook' 'Laptop' 'Mobile' 'Mug' 'Glass' 'Flask' 'Bottle' 'Jug'
+	
+	if (datasetOption == 2) {
+
+		if (strcmp(nameChar, "Monitor") == 0 ) {
+			intLabel = 0;
+		}
+		else if (strcmp(nameChar, "Keyboard") == 0 ){
+			intLabel = 1;
+		}
+		else if (strcmp(nameChar,"Mouse")== 0 ) {
+			intLabel = 2;
+		}
+		else if (strcmp(nameChar,"Papers")== 0 ) {
+			intLabel = 3;
+		}
+		else if (strcmp(nameChar, "Book")== 0 ) {
+			intLabel = 4;
+		}
+		else if (strcmp(nameChar, "Notebook")== 0 ) {
+			intLabel = 5;
+		}
+		else if (strcmp(nameChar, "Laptop")== 0 ) {
+			intLabel = 6;
+		}
+		else if (strcmp(nameChar,"Mobile")== 0 ) {
+			intLabel = 7;
+		}
+		else if (strcmp(nameChar, "Mug")== 0 ) {
+			intLabel = 8;
+		}
+		else if (strcmp(nameChar,"Glass")== 0 ) {
+			intLabel = 9;
+		}
+		else if (strcmp(nameChar, "Flask")== 0 ) {
+			intLabel = 10;
+		}
+		else if (strcmp(nameChar, "Bottle")== 0 ) {
+			intLabel = 11;
+		}
+		else if (strcmp(nameChar, "Jug")== 0 ) {
+			intLabel = 12;
 		}
 		else {
 			intLabel = -1;
@@ -298,5 +348,8 @@ vector<int> convertStringToIntCategoryLabelVector(vector<string> stringLabels) {
 
 }
 
-
+    bool IsFiniteNumber(float x) 
+    {
+        return (x <= DBL_MAX && x >= -DBL_MAX); 
+    }
 

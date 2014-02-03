@@ -7,7 +7,7 @@
 
 
 #include "ApiConvertServiceFormat.hpp"
-#define TESTFLAG 1
+#define TESTFLAG 0
 
 
 void ApiConvertServiceFormat::parseScene(vector<string> objectList, vector<vector<pcl::PointXYZ> > bboxList, vector<pcl::PointXYZ> poseList, SceneInformation & currentScene){
@@ -31,11 +31,12 @@ void ApiConvertServiceFormat::parseScene(vector<string> objectList, vector<vecto
         ////  the instance id is an int following the same order of appearance of the objects in the scene
         newObject.setInstanceID(counter);
 
-        newObject.setCentroidPoint(poseList.at(counter));
-
-	// cout << "in ApiConvertServiceFormat::parseScene: size bboxlist =  " << bboxList.size() << endl;
+        	// cout << "in ApiConvertServiceFormat::parseScene: size bboxlist =  " << bboxList.size() << endl;
 
         newObject.setBoundingBox(bboxList.at(counter));
+
+	// newObject.setCentroidPoint(poseList.at(counter)); // using the input centroid
+	newObject.setCentroid();    			     // using the vertices of the bounding box
 
         currentScene.addObject(newObject);
 

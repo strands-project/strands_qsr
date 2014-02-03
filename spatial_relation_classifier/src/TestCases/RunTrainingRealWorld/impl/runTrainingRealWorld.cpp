@@ -6,9 +6,6 @@
  */
 
 
-
-
-
 #include <stdio.h>
 #include <vector>
 #include <string>
@@ -46,9 +43,18 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
 
-		int numberOfCategories = 11;
+		char* dirNameChar = argv[1];
+		string dir(dirNameChar);
+		cout << dir << endl;
+		
+
+		// string dir = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/data/random-foldings/80-percent-train/TrainData_80p_9_mod.json";
+
+		int numberOfCategories = 13;
+
+		string storingFolder = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/spatial_relation_classifier/src/paramsRealWorld";
 
 		//string dir = "/home/marina/workspace_eclipse_scene_object_classification/data/data_more_objects/";		
 		// string dir = "/home/marina/workspace_eclipse_scene_object_classification/data/data_simulation/simulation/bham_office_desk_500_modifiedroot.json";
@@ -56,8 +62,9 @@ int main() {
 
 
 		//string dir = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/data/real-world/131107_All_Scenes_mod.json";
-		 string dir = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/data/real-world/131110_All_Scenes_mod.json";
+		// string dir = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/data/real-world/131110_All_Scenes_mod.json";
 		// string dir = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/data/real-world/Two_Days_All_Scenes_mod.json";
+
 
 	/*
 		DatabaseInformation db(numberOfCategories);
@@ -117,7 +124,7 @@ int main() {
 
 		Training doTraining;
 		doTraining.learnGMMSingleObjectFeature(FMSingleObject, nclusters, normalizationOption);  
-		doTraining.learnGMMObjectPairFeature(FMObjectPair, nclusters, normalizationOption);   // ERROR ONLY IN ONE FILE !!!
+		doTraining.learnGMMObjectPairFeature(FMObjectPair, nclusters, normalizationOption);   
 
 		cout << "Compute frequencies" << endl;
 		// compute object frequencies and co-occurrence frequency on training database
@@ -129,7 +136,7 @@ int main() {
 
 		// storing to file
 
-		string storingFolder = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/spatial_relation_classifier/src/paramsRealWorld";
+
 		// string storingFolder = "src/paramsRealWorld";
 
 		cout << "store training " << endl;

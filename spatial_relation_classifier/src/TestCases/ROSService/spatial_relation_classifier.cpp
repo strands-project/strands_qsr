@@ -52,6 +52,12 @@ using namespace std;
 bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & req,
          strands_qsr_msgs::GetGroupClassification::Response & res) {
 
+	string storingFolder = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/spatial_relation_classifier/src/paramsRealWorld";
+
+	// PERCEPTION input:
+	// 1 to take perception confidence into account, 0 for not considering perception
+	int perceptionOption = 1;
+
 	SceneInformation testScene;
 
 	// Extracts the fields from the ROS service request and stores them into c++ data structures
@@ -59,7 +65,7 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 	vector<strands_qsr_msgs::BBox> bboxListInput = req.bbox;
 	vector<geometry_msgs::Pose> poseListInput = req.pose;
 
-	cout << "Extract fields of request " << endl;
+	// cout << "Extract fields of request " << endl;
 
 	// Converts the Pose field of the request
 	vector<pcl::PointXYZ> poseList;
@@ -71,7 +77,7 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 		poseList.push_back(point);
 	}
 
-	cout << "Convert the bbox field of the request " << endl;
+	// cout << "Convert the bbox field of the request " << endl;
 
 	// Converts the bbox field of the request
 	vector<vector<pcl::PointXYZ> > bboxList;
@@ -97,7 +103,7 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 
 	vector<strands_qsr_msgs::ObjectClassification> classificationListInupt = req.group_classification;
 
-	cout << "Convert data MsgToIDS" << endl;
+	// cout << "Convert data MsgToIDS" << endl;
 
 	map<string, mapCategoryConfidence> msgMap = Test::convertObjectClassificationMsgToIDS(classificationListInupt);
 
@@ -105,13 +111,13 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 
 
 	// Parses the scene and converts the data into the internal data structure
-	cout << "Parse scene" << endl;
+	// cout << "Parse scene" << endl;
 
 	ApiConvertServiceFormat::parseScene(objectInstanceNameList, bboxList, poseList, testScene);
 
 	// // Feature extraction: single object and object pair features
 
-	cout << "Extract features" << endl;
+	// cout << "Extract features" << endl;
 
 	SceneSingleObjectFeature sceneSof;
 	SceneObjectPairFeature sceneOpf;
@@ -132,15 +138,12 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 	// string storingFolder = "./src/params";
 	// string storingFolder = "src/paramsRealWorld";
 	// string storingFolder = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/spatial_relation_classifier/src/params";
-	string storingFolder = "/home/marina/catkin_strands_qsr_ws/src/strands_qsr/spatial_relation_classifier/src/paramsRealWorld";
+
 	ModelTrainedIO::loadTrainedGMMsFile(storingFolder, testingScene);
 	ModelTrainedIO::loadfrequencies(storingFolder, testingScene);
 
 	int normalizationOption = 0;
-
-	// PERCEPTION input:
-	// 1 to take perception confidence into account, 0 for not considering perception
-	int perceptionOption = 0;   
+   
 
 	vector<strands_qsr_msgs::ObjectClassification> results;
 
@@ -158,14 +161,14 @@ bool handle_group_estimate(strands_qsr_msgs::GetGroupClassification::Request  & 
 
 	for (std::map<string, mapCategoryConfidence>::iterator it=outMap.begin(); it!=outMap.end(); ++it) {
 
- 		std::cout << it->first << endl; 
+ 		// std::cout << it->first << endl; 
 		
 		mapCategoryConfidence categoryConfidenceMap = it->second; 
 
 		for (std::map<int, double>::iterator it2=categoryConfidenceMap.begin(); it2!=categoryConfidenceMap.end(); ++it2) {
 			int cat = it2->first;
 			double score = it2->second;
-			cout << "Category number: " << cat << "    Score:  " << score << endl; 
+			// cout << "Category number: " << cat << "    Score:  " << score << endl; 
 		}
 	}
 	// ****************************************************************************************
