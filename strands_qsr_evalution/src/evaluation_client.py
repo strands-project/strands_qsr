@@ -115,6 +115,40 @@ def evaluate_scene(scene, perception, object_types):
 
     return ground_truth, percept, relations
 
+import os
+
+########################################################################
+class ProgressMeter:
+    """Wraps an iterable and displays a progress meter as it is iterated through."""
+
+    def __init__(self, iterable):
+        """Constructor"""
+        self.iterator = iter(iterable)
+        self.length = len(iterable)
+        self.pos=0
+        os.system("setterm -cursor off")
+        self.progress = '[|--------------------------------------------------|]'
+        print "Progress: "
+        
+    def __iter__(self):
+        return self
+    
+    def __del__(self):
+        """End"""
+        os.system("setterm -cursor on")
+        print
+        
+    
+    def next(self):
+        """"""
+        percent = int(self.pos/float(self.length) * 50)
+        self.pos+=1
+        print self.progress.replace('-','#',percent)+' %d%%\r'%(percent*2),
+        return self.iterator.next()
+        
+        
+
+
 
 if __name__ == "__main__":
 
@@ -167,10 +201,10 @@ if __name__ == "__main__":
     sum_perception = 0
     sum_relations = 0
     total = 0
-    for scene in scenes:
+    for scene in ProgressMeter(scenes):
         ## check if it is a scene for new data format
         if scene.get('scene_id'):
-
+            #print "Evaluating"
             gt, pc, rl = evaluate_scene(scene, perceptions[scene['scene_id']],
                                         object_types)
             for o in gt.keys():
@@ -182,6 +216,7 @@ if __name__ == "__main__":
                 if truth == relate:
                     sum_relations += 1
                 total += 1
+                
             #sum_perception += sum([1 if g==p else 0 for g, p in zip(gt, pc)])
             #sum_relations+= sum([1 if g==r else 0 for g, r in zip(gt, rl)])
             #total += len(gt)
