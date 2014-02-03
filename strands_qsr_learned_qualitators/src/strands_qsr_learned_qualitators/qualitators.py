@@ -156,7 +156,20 @@ class SizeQualitator(Qualitator):
             return True
         return False
     
+
+class ProjectionConectivity(Qualitator):
+    def __init__(self, name, axis):
+        super(ProjectionConectivity, self).__init__(name, 2)
+        self.axis = axis
+    def __call__(self, geometry):
+        dist = geometry[self.axis]
+        s1 = geometry[3 + self.axis]
+        s2 = geometry[6 + self.axis]
         
+        if dist < (s1 + s2) / 2:
+            return True
+        else:
+            return False
                 
         
 class AbsoluteSizeQualitator(Qualitator):

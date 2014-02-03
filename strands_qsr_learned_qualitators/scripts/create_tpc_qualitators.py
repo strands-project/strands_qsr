@@ -47,65 +47,79 @@ if __name__ == '__main__':
     
     
     print "Loading data file"
-    if not os.path.isfile(options.scenes_filename):
-        print "ERROR: scene file does not exist"
-        sys.exit(1)
+    #if not os.path.isfile(options.scenes_filename):
+        #print "ERROR: scene file does not exist"
+        #sys.exit(1)
        
-    with open(options.scenes_filename, "r") as f:
-        scenes = json.load(f)
-    geo_states = [gs.GeometricState.from_scene_data(s) for s in scenes if s['scene_id'] != "Ali_Table_131030_Aft"]
+    #with open(options.scenes_filename, "r") as f:
+        #scenes = json.load(f)
+    #geo_states = [gs.GeometricState.from_scene_data(s) for s in scenes if s.get('scene_id')]
 
-    distances = []
-    sizes = []
+    #distances = []
+    #sizes = []
     
-    for geo in geo_states:
-        for ob1 in geo._objects.keys():
-            for ob2 in geo._objects.keys():
-                if ob1 == ob2:
-                    continue
-                delta = [(a - b) * (a - b) for a, b in zip(geo._objects[ob1].position,
-                                               geo._objects[ob2].position)]
-                distances.append( math.sqrt(sum(delta)) )
-            sizes.append(geo._objects[ob2].bbox.get_volume())
+    #for geo in geo_states:
+        #for ob1 in geo._objects.keys():
+            #for ob2 in geo._objects.keys():
+                #if ob1 == ob2:
+                    #continue
+                #delta = [(a - b) * (a - b) for a, b in zip(geo._objects[ob1].position,
+                                               #geo._objects[ob2].position)]
+                #distances.append( math.sqrt(sum(delta)) )
+            #sizes.append(geo._objects[ob2].bbox.get_volume())
         
-    print "Clustering sizes and distances..."
-    dists = sorted(kmeans(np.array(distances), 3)[0])
-    number_size_clusters = 15
-    sizs = sorted(kmeans(np.array(sizes), number_size_clusters)[0])
-    number_size_clusters = len(sizs)
-    print max(np.array(distances))
-    print dists
-    print sizs
+    #print "Clustering sizes and distances..."
+    #dists = sorted(kmeans(np.array(distances), 3)[0])
+    #number_size_clusters = 15
+    #sizs = sorted(kmeans(np.array(sizes), number_size_clusters)[0])
+    #number_size_clusters = len(sizs)
+    #print max(np.array(distances))
+    #print dists
+    #print sizs
         
     ##Using Lars' Two Point stuff
+    ############################
     qs =  qualitators.Qualitators()
     qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("behind", (0, 1, 7)))
     qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("left", (1, 2, 3)))
     qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("front", (3, 4, 5)))
     qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("right", (5, 6, 7)))
+    ############################
     
     
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, (dists[0]+dists[1])/2.0)))
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", ((dists[0]+dists[1])/2.0,
-                                                                       (dists[1]+dists[2])/2.0)))
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", ((dists[1]+dists[2])/2.0,
-                                                                         1e100)))
-    
-    qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz0", (0, (sizs[0]+sizs[1])/2.0)))
-    for i in range(1, number_size_clusters-1):
-        qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz%d"%i, ((sizs[i-1]+sizs[i])/2.0,
-                                                                           (sizs[i]+sizs[i+1])/2.0)))
-    qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz%d"%(i+1), ((sizs[i]+sizs[i+1])/2.0,
-                                                                       1e1000)))
-        
-    #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("small", ((sizs[0]+sizs[1])/2.0,
-                                                                       #(sizs[1]+sizs[2])/2.0)))
-    #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("large", ((sizs[1]+sizs[2])/2.0,
+    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, (dists[0]+dists[1])/2.0)))
+    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", ((dists[0]+dists[1])/2.0,
+                                                                       #(dists[1]+dists[2])/2.0)))
+    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", ((dists[1]+dists[2])/2.0,
                                                                          #1e100)))
     
-    #qs.add_qualitator(qualitators.SizeQualitator("wider", 0))
-    #qs.add_qualitator(qualitators.SizeQualitator("deeper", 1))
-    #qs.add_qualitator(qualitators.SizeQualitator("taller", 2))
+    #######################
+    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, 0.15)))
+    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", (0.15 , 0.4 )))
+    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", (0.4 , 1e100)))
+    #######################
+    
+    #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz0", (0, (sizs[0]+sizs[1])/2.0)))
+    #for i in range(1, number_size_clusters-1):
+        #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz%d"%i, ((sizs[i-1]+sizs[i])/2.0,
+                                                                           #(sizs[i]+sizs[i+1])/2.0)))
+    #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz%d"%(i+1), ((sizs[i]+sizs[i+1])/2.0,
+                                                                       #1e1000)))
+        
+    ##qs.add_qualitator(qualitators.AbsoluteSizeQualitator("small", ((sizs[0]+sizs[1])/2.0,
+                                                                       ##(sizs[1]+sizs[2])/2.0)))
+    ##qs.add_qualitator(qualitators.AbsoluteSizeQualitator("large", ((sizs[1]+sizs[2])/2.0,
+                                                                         ##1e100)))
+    ##########################
+    qs.add_qualitator(qualitators.SizeQualitator("wider", 0))
+    qs.add_qualitator(qualitators.SizeQualitator("deeper", 1))
+    qs.add_qualitator(qualitators.SizeQualitator("taller", 2))
+    ##########################
+    
+    ##########################
+    qs.add_qualitator(qualitators.ProjectionConectivity("x-connected", 0))
+    qs.add_qualitator(qualitators.ProjectionConectivity("y-connected", 1))
+    ##########################
     
     #qs.add_qualitator(qualitators.AbsolutSizeQualitator("small", 
     
