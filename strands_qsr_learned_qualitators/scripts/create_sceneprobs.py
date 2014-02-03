@@ -56,7 +56,7 @@ if __name__ == '__main__':
     with open(options.scenes_filename, "r") as f:
         scenes = json.load(f)
 
-    geo_states = [gs.GeometricState.from_scene_data(s) for s in scenes]
+    geo_states = [gs.GeometricState.from_scene_data(s) for s in scenes if s.get('scene_id')]
 
     qual = qualitators.Qualitators.load_from_disk(options.qualitators_filename)
     print "Loaded ", len(qual._qualitators), "qualitators from disk"
