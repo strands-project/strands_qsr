@@ -42,14 +42,20 @@ if __name__ == "__main__":
     
     (options, args) = parser.parse_args()
 
-    if not options.output_filename:
-        parser.error("output file name is required")
     if not options.scenes_filename:
         parser.error("scenes file name is required")
     if not options.perception_model:
         parser.error("a perception model must be specified.")
     if not options.object_types and not options.all_objects:
         parser.error("at lease one object type must be specified.")
+    if not options.output_filename:
+        d = os.path.dirname(options.scenes_filename)
+        f = os.path.basename(options.scenes_filename)
+        options.output_filename = os.path.join(d, '../perception', 
+                                               f[:-5]+ "_" + options.perception_model
+                                                + ".json")
+        #parser.error("output file name is required")
+        print "Using scenes filename appended with model as output filename."
 
     seed =  time()
     random.seed(seed)
@@ -136,7 +142,7 @@ if __name__ == "__main__":
     with open(options.output_filename, "w") as outfile:
         json.dump(generated_perception, outfile)
         
-    print "Perception saved to file '"+options.output_filename+"'"
+    print "Perception saved to file '" + options.output_filename + "'"
     print "Perception scores:", winner, " good, ", looser, " bad:", 100.0 * (winner / float(winner + looser)), "%"
                 
                 

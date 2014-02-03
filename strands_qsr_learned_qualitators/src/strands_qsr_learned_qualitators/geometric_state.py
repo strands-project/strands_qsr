@@ -50,7 +50,8 @@ object_types = ["Monitor",
                 "Stapler",
                 "Keys",
                 "Book",
-                "Bottle"
+                "Bottle",
+                "UNKNOWN"
     ]
 
 #object_types = [u'Mobile', u'Monitor',  u'Flask', u'Laptop', u'Papers', u'Glass', u'Mug', u'Book', u'Bottle', u'Keyboard', u'Mouse']
@@ -147,10 +148,11 @@ class GeometricState(object):
     def from_scene_data(cls, scene_dict):
         gs = GeometricState(scene_dict["scene_id"])
         for i in scene_dict["objects"]:
-            gs.add_object(i, scene_dict["type"][i],
-                          scene_dict['position'][i],
-                          scene_dict['orientation'][i],
-                          scene_dict['bbox'][i])
+            if scene_dict["type"][i] != "UNKNOWN":
+                gs.add_object(i, scene_dict["type"][i],
+                              scene_dict['position'][i],
+                              scene_dict['orientation'][i],
+                              scene_dict['bbox'][i])
         return gs
 
 import rospy
@@ -217,7 +219,7 @@ class GeometricStateViz(object):
             text.pose.position.y = point.y
             text.pose.position.z = point.z
             text.points.append(point)
-            text.text = obj.name
+            text.text = self._geometric_state.get_object_type(obj.name)
             ma.markers.append(marker)
             ma.markers.append(text)
         
