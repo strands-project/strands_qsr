@@ -62,7 +62,7 @@ class LearnedQualitatorGroupClassifier(object):
         #print "Number relations: ", len(s)
             
         #print "!-!-" * 20
-        print "Evaluating scene [", self.number_done, "]"
+        #print "Evaluating scene [", self.number_done, "]"
         #print "----" * 20
         #print "State:", state
         self.number_done += 1
@@ -131,16 +131,19 @@ class LearnedQualitatorGroupClassifier(object):
                 for chg in req.type:
                     if chg == state[ob]:
                         continue
-                    ss = copy.copy(state)
-                    ss[ob] = chg
-                    score_delta = evaluate_state(ss)
-
+                    #ss = copy.copy(state)
+                    tmp = state[ob]
+                    state[ob] = chg
+                    score_delta = evaluate_state(state)
+                    state[ob] = tmp
+                    
                     delta = score_delta - score
                     if delta > best_delta:
                         best_delta = delta
                         best = [ob, chg]
             #print best_delta, best
             if best_delta > 1e-14:
+                #print best_delta
                 state[best[0]] = best[1]
 
         #changes = 0
