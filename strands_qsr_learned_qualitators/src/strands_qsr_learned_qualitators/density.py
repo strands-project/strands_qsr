@@ -28,12 +28,12 @@ class GaussKernel(object):
         #self.cov = c
         
         #print data_points.shape
-        #self.cov =  empirical_covariance(data_points) #[0]
-        self.cov, shrink =  oas(data_points) #[0]
-        if shrink != 1:
-            self.cov /= (1 - shrink)
+        self.cov =  empirical_covariance(data_points) #[0]
+        #self.cov, shrink =  oas(data_points) #[0]
+        #if shrink != 1:
+            #self.cov /= (1 - shrink)
             
-        print self.cov
+        #print self.cov
         
         self.eig_vals, self.eig_vecs = np.linalg.eig(self.cov)
 
