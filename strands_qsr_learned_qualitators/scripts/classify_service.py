@@ -22,18 +22,28 @@ import sys
 #from pyevolve import GSimpleGA
 
 class LearnedQualitatorGroupClassifier(object):
-    def __init__(self, qsrs_file, scenes_file):
+    def __init__(self, qsrs_file, scenes_file,  priors_file):
         rospy.loginfo("Loading qualitators")
         self.qual = qualitators.Qualitators.load_from_disk(qsrs_file)
         rospy.loginfo ("Loaded " + str(len(self.qual._qualitators)) + "qualitators from disk")
         
         rospy.loginfo("Loading scene probabilities")
         self.prob =  scene.RelationProbabilities.load_from_disk(scenes_file)
+        
+        rospy.loginfo("Precomp log probs")
+        self.log_prob = {}
+        for i in self.prob.probabilities.keys():
+            self.log_prob[i] = {}
+            for j in self.prob.probabilities[i].keys():
+                self.log_prob[i][j] = math.log(self.prob.probabilities[i][j][0])
+        rospy.loginfo("Ok")
 
         self.srv_handle = rospy.Service('group_classification', GetGroupClassification, self.handle_request)
         
         rospy.loginfo("Ready to classify groups")
         self.number_done = 0
+        
+        #self.priors = scene.PriorProbabilities.load_from_disk(priors_file)
     
     def handle_request(self, req):
         res = GetGroupClassificationResponse()
@@ -104,19 +114,22 @@ class LearnedQualitatorGroupClassifier(object):
             if p == 0:
                 return math.log(1e-300) 
             score =  math.log(p)
+            #score =  0
 
             #print "log(score) = ", score, 
             for rel in s:
 
                 #print "Mult by",rel[0], (state[rel[1]], state[rel[2]]),  ":", self.prob.get_prob(rel[0], (state[rel[1]], state[rel[2]]) )
                 consts = [state[rl] for rl in rel[1:]]
-                p_z_x = self.prob.get_prob(rel[0], tuple(consts))
-                                           
+                #p_z_x = self.prob.get_prob(rel[0], tuple(consts))
+                log_p_z_z = self.log_prob[rel[0]][tuple(consts)]
                 #p_z_x = self.prob.get_prob(rel[0], (state[rel[1]], state[rel[2]]) ) 
 
                 #print " + ", math.log(p_z_x), 
                 #score *= p_z_x
-                score += math.log(p_z_x)
+                
+                #score += math.log(p_z_x)
+                score += log_p_z_z
                 
             return score
        
@@ -198,6 +211,9 @@ if __name__ == "__main__":
     parser.add_option("-q", "--qualitators",
                       dest="qualitators_filename", metavar="FILE", 
                       help="load the qualitators from FILE")
+    parser.add_option("-p", "--priors",
+                      dest="priors_file", metavar="FILE", 
+                      help="load the priors from FILE")
     
     (options, args) = parser.parse_args()
     
@@ -218,7 +234,8 @@ if __name__ == "__main__":
       
     rospy.init_node('learned_classification_server')
     service =  LearnedQualitatorGroupClassifier(options.qualitators_filename,
-                                                options.probs_filename)
+                                                options.probs_filename,
+                                                options.priors_file)
     rospy.spin()
 
 
