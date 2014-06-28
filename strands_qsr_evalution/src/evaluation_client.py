@@ -144,6 +144,7 @@ class ProgressMeter:
         percent = int(self.pos/float(self.length) * 50)
         self.pos+=1
         print self.progress.replace('-','#',percent)+' %d%%\r'%(percent*2),
+        sys.stdout.flush()
         return self.iterator.next()
         
         

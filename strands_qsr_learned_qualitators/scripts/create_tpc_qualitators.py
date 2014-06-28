@@ -32,6 +32,10 @@ if __name__ == '__main__':
     parser.add_option("-o", "--output",
                       dest="output_filename", metavar="FILE", 
                       help="store qualitators in FILE")
+    parser.add_option("-t", "--type",
+                      dest="qsr_type", metavar="{tpc,dist,relsize,connect},"
+                      "underscore sep list",
+                      help="type of qsrs")
     
     parser.add_option("-O", "--overwrite",
                       action="store_true", dest="overwrite", default=False, 
@@ -44,9 +48,14 @@ if __name__ == '__main__':
         parser.error("output file name is required")
     if not options.scenes_filename:
         parser.error("scenes file name is required")        
-    
-    
-    print "Loading data file"
+    if not options.qsr_type:
+        options.qsr_type = []
+    else:
+        options.qsr_type = options.qsr_type.split("_")
+        
+    print "Types:", options.qsr_type
+        
+    #print "Loading data file"
     #if not os.path.isfile(options.scenes_filename):
         #print "ERROR: scene file does not exist"
         #sys.exit(1)
@@ -54,7 +63,7 @@ if __name__ == '__main__':
     #with open(options.scenes_filename, "r") as f:
         #scenes = json.load(f)
     #geo_states = [gs.GeometricState.from_scene_data(s) for s in scenes if s.get('scene_id')]
-
+    #print "Loaded."
     #distances = []
     #sizes = []
     
@@ -77,26 +86,31 @@ if __name__ == '__main__':
     #print dists
     #print sizs
         
+    qs =  qualitators.Qualitators()
+    
     ##Using Lars' Two Point stuff
     ############################
-    qs =  qualitators.Qualitators()
-    qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("behind", (0, 1, 7)))
-    qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("left", (1, 2, 3)))
-    qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("front", (3, 4, 5)))
-    qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("right", (5, 6, 7)))
+    ## TPC
+    if "tpc" in options.qsr_type:
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("behind", (0, 1, 7)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("left", (1, 2, 3)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("front", (3, 4, 5)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("right", (5, 6, 7)))
     ############################
     
     
-    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, (dists[0]+dists[1])/2.0)))
-    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", ((dists[0]+dists[1])/2.0,
-                                                                       #(dists[1]+dists[2])/2.0)))
-    #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", ((dists[1]+dists[2])/2.0,
-                                                                         #1e100)))
     
     #######################
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, 0.15)))
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", (0.15 , 0.4 )))
-    qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", (0.4 , 1e100)))
+    ## Distance
+    if "dist" in options.qsr_type:
+        #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, (dists[0]+dists[1])/2.0)))
+        #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", ((dists[0]+dists[1])/2.0,
+                                                                           #(dists[1]+dists[2])/2.0)))
+        #qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", ((dists[1]+dists[2])/2.0,
+                                                                             #1e100)))
+        qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("veryclose", (0, 0.15)))
+        qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("close", (0.15 , 0.4 )))
+        qs.add_qualitator(qualitators.TwoPointCalcDistQualitator("distant", (0.4 , 1e100)))
     #######################
     
     #qs.add_qualitator(qualitators.AbsoluteSizeQualitator("sz0", (0, (sizs[0]+sizs[1])/2.0)))
@@ -111,17 +125,19 @@ if __name__ == '__main__':
     ##qs.add_qualitator(qualitators.AbsoluteSizeQualitator("large", ((sizs[1]+sizs[2])/2.0,
                                                                          ##1e100)))
     ##########################
-    qs.add_qualitator(qualitators.SizeQualitator("wider", 0))
-    qs.add_qualitator(qualitators.SizeQualitator("deeper", 1))
-    qs.add_qualitator(qualitators.SizeQualitator("taller", 2))
+    ## Relative size
+    if "relsize" in options.qsr_type:
+        qs.add_qualitator(qualitators.SizeQualitator("wider", 0))
+        qs.add_qualitator(qualitators.SizeQualitator("deeper", 1))
+        qs.add_qualitator(qualitators.SizeQualitator("taller", 2))
     ##########################
     
     ##########################
-    qs.add_qualitator(qualitators.ProjectionConectivity("x-connected", 0))
-    qs.add_qualitator(qualitators.ProjectionConectivity("y-connected", 1))
+    ## Connectivity
+    if "connectivity" in options.qsr_type:
+        qs.add_qualitator(qualitators.ProjectionConectivity("x-connected", 0))
+        qs.add_qualitator(qualitators.ProjectionConectivity("y-connected", 1))
     ##########################
-    
-    #qs.add_qualitator(qualitators.AbsolutSizeQualitator("small", 
     
         
     if os.path.exists(options.output_filename) and not options.overwrite:

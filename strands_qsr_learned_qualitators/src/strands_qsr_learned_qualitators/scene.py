@@ -11,11 +11,11 @@ class RelationProbabilities(object):
             self.probabilities[relation][object_pair] = [0.001, 2]#[ 0.0001 , 2]
     
     def get_prob(self, relation, object_pair):
-        self._check_prob_exists(relation, object_pair)
+#        self._check_prob_exists(relation, object_pair)
         return self.probabilities[relation][object_pair][0]
     
     def update_probs_new_example(self, relation, object_pair, pos_neg):
-        self._check_prob_exists(relation, object_pair)
+        #self._check_prob_exists(relation, object_pair)
         if pos_neg: # positive
             self.probabilities[relation][object_pair][0] = (self.probabilities[relation][object_pair][0] *
                                                             self.probabilities[relation][object_pair][1] + 1) / (self.probabilities[relation][object_pair][1] + 1)
@@ -25,6 +25,39 @@ class RelationProbabilities(object):
             self.probabilities[relation][object_pair][1] += 1
         self.probabilities[relation][object_pair][0]     
         
+    def save_to_disk(self, filename):
+        with open(filename, "w") as f:
+            pickle.dump(self, f)
+    
+    @classmethod
+    def load_from_disk(self, filename):
+        with open(filename, "r") as f:
+            ob = pickle.load(f)
+        return ob
+    
+
+class PriorProbabilities(object):
+    def __init__(self):
+        self.probabilities = {}
+        
+    def _check_prob_exists(self, obj):
+        if obj not in self.probabilities:
+            self.probabilities[obj] = [0, 0]#[ 0.0001 , 2]
+    
+    def get_prob(self, obj):
+        self._check_prob_exists(obj)
+        return self.probabilities[obj][0]
+    
+    def update_probs_new_example(self, obj, pos_neg):
+        self._check_prob_exists(obj)
+        if pos_neg: # positive
+            self.probabilities[obj][0] = (self.probabilities[obj][0] *
+                                          self.probabilities[obj][1] + 1) / float((self.probabilities[obj][1] + 1))
+            self.probabilities[obj][1] += 1
+        else:
+            self.probabilities[obj][0] = (self.probabilities[obj][0] * self.probabilities[obj][1]) / float((self.probabilities[obj][1] + 1))
+            self.probabilities[obj][1] += 1
+                
     def save_to_disk(self, filename):
         with open(filename, "w") as f:
             pickle.dump(self, f)

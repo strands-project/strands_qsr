@@ -16,7 +16,7 @@ class Qualitator(object):
     def __init__(self,  name, dimensions):
         self.name = name
         self.dimensions = dimensions
-    def __call__(self, geometry):
+    def __call__(self, geometry, cam_pos=None):
         raise Exception("Trying to use base class qualitator.")
     def to_str(self, *params):
         s = "("+self.name 
@@ -88,7 +88,7 @@ class SimpleGaussianQualitator(Qualitator):
         self._gaussian = gaussian
         self._threshold = std_threshold
     
-    def __call__(self, geometry):
+    def __call__(self, geometry, cam_pos=None):
         #s = self._gaussian.calc_error(geometry)
         #if s < self._threshold:
             #return True
@@ -122,8 +122,13 @@ class TwoPointCalcAngleQualitator(Qualitator):
         super(TwoPointCalcAngleQualitator, self).__init__(name, 2)
         self.partitions = partions
         self.cam_pos = [1.0,-2.0,1.698]
-    def __call__(self, geometry):
-        rela = qsr_calc.relative_angle(self.cam_pos, [0, 0, 0], geometry[0:3])
+    def __call__(self, geometry, cam_pos=None):
+        if cam_pos is not None:
+            print "Using cam_pos: ", cam_pos
+            rela = qsr_calc.relative_angle(cam_pos, geometry[0][0], geometry[1][0])
+        else:
+            rela = qsr_calc.relative_angle(self.cam_pos, geometry[0][0], geometry[1][0])
+        print "rela=", rela
         part = qsr_calc.argmax_partition(rela)
         if part in self.partitions:
             return True
@@ -136,8 +141,11 @@ class TwoPointCalcDistQualitator(Qualitator):
         super(TwoPointCalcDistQualitator, self).__init__(name, 2)
         self.valid_range = valid_range
         self.cam_pos = [1.0,-2.0,1.698]
-    def __call__(self, geometry):
-        reld = qsr_calc.relative_radius(self.cam_pos,[0, 0, 0], geometry[0:3])
+    def __call__(self, geometry, cam_pos=None):
+        if cam_pos is not None:
+            reld = qsr_calc.relative_radius(self.cam_pos, geometry[0][0], geometry[1][0])
+        else:
+            reld = qsr_calc.relative_radius(self.cam_pos, geometry[0][0], geometry[1][0])
 
         if reld >=  self.valid_range[0] and reld < self.valid_range[1]:
             return True
@@ -151,7 +159,7 @@ class SizeQualitator(Qualitator):
     def __init__(self, name, side):
         super(SizeQualitator, self).__init__(name, 2)
         self.d = side
-    def __call__(self, geometry):
+    def __call__(self, geometry, cam_pos=None):
         if geometry[self.d+3] > geometry[self.d+6]:
             return True
         return False
@@ -161,7 +169,7 @@ class ProjectionConectivity(Qualitator):
     def __init__(self, name, axis):
         super(ProjectionConectivity, self).__init__(name, 2)
         self.axis = axis
-    def __call__(self, geometry):
+    def __call__(self, geometry, cam_pos=None):
         dist = geometry[self.axis]
         s1 = geometry[3 + self.axis]
         s2 = geometry[6 + self.axis]
@@ -176,7 +184,7 @@ class AbsoluteSizeQualitator(Qualitator):
     def __init__(self, name, rng):
         super(AbsoluteSizeQualitator, self).__init__(name, 1)
         self.range = rng
-    def __call__(self, geometry):
+    def __call__(self, geometry, cam_pos=None):
         volume = geometry[3] * geometry[4] * geometry[5]
         if volume >  self.range[0] and volume < self.range[1]:
             return True

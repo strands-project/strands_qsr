@@ -22,37 +22,37 @@ from operator import itemgetter
     #]
 
 ##REAL
-object_types = ["Monitor",
-                "Cup",
-                "Mug", #
-                "Papers", #
-                "PenStand", #
-                "Jug", #
-                "Headphones", #
-                "Highlighter", #
-                "Marker", #
-                "Notebook", #
-                "Mobile", #
-                "Folder", #
-                "Flask", #
-                "Pen", #
-                "Keyboard",
-                "Pencil",
-                "Telephone",
-                "PC",
-                "Mouse",
-                "Lamp",
-                "Calculator",
-                "Headphone",
-                "Laptop",
-                "MobilePhone",
-                "Glass",
-                "Stapler",
-                "Keys",
-                "Book",
-                "Bottle",
-                "UNKNOWN"
-    ]
+object_types = ['MONITOR',
+ 'CUP',
+ 'MUG',
+ 'PAPERS',
+ 'PENSTAND',
+ 'JUG',
+ 'HEADPHONES',
+ 'HIGHLIGHTER',
+ 'MARKER',
+ 'NOTEBOOK',
+ 'MOBILE',
+ 'FOLDER',
+ 'FLASK',
+ 'PEN',
+ 'KEYBOARD',
+ 'PENCIL',
+ 'TELEPHONE',
+ 'PC',
+ 'MOUSE',
+ 'LAMP',
+ 'CALCULATOR',
+ 'HEADPHONE',
+ 'LAPTOP',
+ 'MOBILEPHONE',
+ 'GLASS',
+ 'STAPLER',
+ 'KEYS',
+ 'BOOK',
+ 'BOTTLE',
+ 'BANANA',
+ 'UNKNOWN']
 
 #object_types = [u'Mobile', u'Monitor',  u'Flask', u'Laptop', u'Papers', u'Glass', u'Mug', u'Book', u'Bottle', u'Keyboard', u'Mouse']
 
@@ -108,7 +108,7 @@ class BBoxArray():
 
 class Object(object):
     def __init__(self, name, obj_type, position, orientation, bbox):
-        if obj_type not in object_types:
+        if obj_type.upper() not in object_types:
             raise Exception("Trying to create an object of non-existing type ({})".format(obj_type))
         self.name = name
         self.obj_type = obj_type
