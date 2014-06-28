@@ -45,6 +45,9 @@ if __name__ == '__main__':
         print "ERROR: qualitators file does not exist"
         sys.exit(1)
       
+    if os.path.exists(options.output_filename) and not options.overwrite:
+        print "ERROR: output file already exists; not proceeding. Use -O to overwrite."
+        sys.exit(1)
 
     print "Loading data file"
     #SCENES_FILE = "/home/chris/catkin_ws/src/strands_qsr/data/random-foldings/50-percent-train/TrainData_50p_0.json"
@@ -61,6 +64,15 @@ if __name__ == '__main__':
     qual = qualitators.Qualitators.load_from_disk(options.qualitators_filename)
     print "Loaded ", len(qual._qualitators), "qualitators from disk"
     rel_probs =  scene.RelationProbabilities()
+    
+    # Pre ensure probs exist
+    OBS = [u"Mouse", u"Keyboard", u"Monitor", u"Papers", u"Book", u"Notebook", u"Laptop",
+           u"Telephone", u"Mug", u"Glass", u"Flask", u"Bottle", "Jug" ]
+    #TODO ugly
+    for q in qual:
+        for ob1 in OBS:
+            for ob2 in OBS:
+                rel_probs._check_prob_exists(q.name, (ob1, ob2))
 
     for i, geo in enumerate(geo_states):
 
@@ -91,9 +103,7 @@ if __name__ == '__main__':
     #print
     
      
-    if os.path.exists(options.output_filename) and not options.overwrite:
-        print "ERROR: output file already exists; not proceeding. Use -O to overwrite."
-        sys.exit(1)
+    
    
     rel_probs.save_to_disk(options.output_filename)
         
