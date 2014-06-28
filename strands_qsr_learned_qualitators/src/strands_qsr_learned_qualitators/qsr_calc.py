@@ -6,18 +6,19 @@ PARTITION_SIZE = (2.0 * math.pi) / NUMBER_OF_PARTITIONS
 
 def relative_radius(a, b, c):
     # compute relative radius r (close/distant)
-    return math.sqrt( math.pow(c[0] - b[0],2.0) +  math.pow(c[1] - b[1],2.0) +  math.pow(c[2] - b[2],2.0))/ math.sqrt( math.pow(b[0] - a[0],2.0) +  math.pow(b[1] - a[1],2.0) +  math.pow(b[2] - a[2],2.0))
+    return math.sqrt( math.pow(c[0] - b[0],2.0) +  math.pow(c[1] - b[1],2.0) +
+                      math.pow(c[2] - b[2],2.0)) / math.sqrt( math.pow(b[0] - a[0],2.0) +  math.pow(b[1] - a[1],2.0) +  math.pow(b[2] - a[2],2.0))
   
 
 def relative_angle(a, b, c):
 
     # compute relative angle (left/right/straight, front/back/straight)
-    angle_BA = math.atan2((b[1] - a[1]),(b[0] - a[0]))
+    angle_BA = math.atan2((b[2] - a[2]),(b[1] - a[1]))
 
     if angle_BA < 0:
       angle_BA += 2 * math.pi
 
-    angle_CB = math.atan2((c[1] - b[1]),(c[0] - b[0]))
+    angle_CB = math.atan2((c[2] - b[2]),(c[1] - b[1]))
     if angle_CB < 0:
        angle_CB += 2 * math.pi
     
