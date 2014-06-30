@@ -92,10 +92,10 @@ if __name__ == '__main__':
     ############################
     ## TPC
     if "tpc" in options.qsr_type:
-        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("behind", (0, 1, 7)))
-        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("left", (1, 2, 3)))
-        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("front", (3, 4, 5)))
-        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("right", (5, 6, 7)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("front", (0, 1, 7)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("right", (1, 2, 3)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("behind", (3, 4, 5)))
+        qs.add_qualitator(qualitators.TwoPointCalcAngleQualitator("left", (5, 6, 7)))
     ############################
     
     
